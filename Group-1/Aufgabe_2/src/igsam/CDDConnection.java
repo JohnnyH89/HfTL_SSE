@@ -3,6 +3,9 @@ package igsam;
 
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -14,31 +17,70 @@ public class CDDConnection {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		OkHttpClient client = new OkHttpClient();
+		int deviceID = 45235;
+		float temperature;
+		String basicDigest = "SGZUTC1Hcm91cC0xOk1va2VsZXQxMw==";
+		
+		//		String authorization = username +":"+ new String(password);
+		//		encodedAuth = Base64.encode(authorization.getBytes());
+		
+		String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date());
+		
+		Random rand = new Random();
+		
+		
+		while (true) {
+			temperature = rand.nextFloat() * 100;
+			System.out.println (temperature);
+			sendTemperature(deviceID, temperature, date, basicDigest);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
 
-		MediaType mediaType = MediaType.parse("application/vnd.com.nsn.cumulocity.measurement+json");
-		RequestBody body = RequestBody.create(mediaType, "{\n\t\"c8y_TemperatureMeasurement\": {\n    \t\"T\": { \n        \t\"value\": 40,\n            \"unit\": \"C\" }\n        },\n    \"time\":\"2016-04-21T19:51:00.000+02:00\", \n    \"source\": {\n    \t\"id\":\"45235\" }, \n    \"type\": \"c8y_TemperatureMeasurement\"\n}");
+	////Michael is watching us!
+	//Ok, jetzt kommt das wichtige!!!
+	
+	public static void sendGPS (){
+		//mach ICH!!!
+	}
+	
+	
+	public static void sendTemperature (int deviceId, float value, String date, String basicDigest){
+		OkHttpClient client = new OkHttpClient();
+		MediaType mediaType = MediaType.parse("application/vnd.com.nsn.cumulocity.measurement+json;charset=UTF-8");
+		RequestBody body = RequestBody.create(mediaType, ""
+				+ "{\"c8y_TemperatureMeasurement\": {"
+				+ "\"T\": {"
+				+ "\"value\":" + value + ","
+				+ "\"unit\": \"C\" }"
+				+ "},"
+				+ "\"time\":\"" + date + "\","
+				+ "\"source\": {"
+				+ "\"id\":\"" + deviceId + "\" },"
+				+ "\"type\": \"c8y_TemperatureMeasurement\""
+				+ "}");
 		Request request = new Request.Builder()
 		  .url("https://cdm.ram.m2m.telekom.com/measurement/measurements")
 		  .post(body)
-		  .addHeader("authorization", "Basic SGZUTC1Hcm91cC0xOk1va2VsZXQxMw==")
-		  .addHeader("content-type", "application/vnd.com.nsn.cumulocity.measurement+json")
-		  .addHeader("accept", "application/vnd.com.nsn.cumulocity.measurement+json")
-		  .addHeader("cache-control", "no-cache")
-		  .addHeader("postman-token", "bdc325db-9bbd-5162-dab4-775e4159004b")
+		  .addHeader("authorization", "Basic " +  basicDigest )
+		  .addHeader("content-type", "application/vnd.com.nsn.cumulocity.measurement+json;charset=UTF-8;ver=0.9")
 		  .build();
-
 
 		try {
 			System.out.println(request.toString());
 			Response response = client.newCall(request).execute();
 			System.out.println(response.message());
 			System.out.println(response.toString());
+			System.out.print("KRASSER SHIT!!!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-
 }
