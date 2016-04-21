@@ -2,6 +2,8 @@ package igsam;
 
 import java.awt.PageAttributes.MediaType;
 
+import okhttp3.OkHttpClient;
+
 public class CDDConnection {
 
 	public static void main(String[] args) {
