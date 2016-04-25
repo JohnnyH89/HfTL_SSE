@@ -136,25 +136,4 @@ public class CDDConnection {
 
     }
 
-    public static void sendGPS(float alt, float longitude, float latitude, String date) throws Exception {
-        OkHttpClient client = new OkHttpClient();
-
-        MediaType mediaType = MediaType.parse("application/vnd.com.nsn.cumulocity.event+json;charset=UTF-8");
-        RequestBody body = RequestBody.create(mediaType, "{\n\t\"c8y_Position\": {\n    \t\"alt\": " + alt + ",\n      \t\"lng\": " + longitude + ",\n      \t\"lat\": " + latitude + " },\n\t\"time\":\"" + date + "\",\n    \"source\": {\n    \t\"id\":\"" + deviceId + "\" }, \n    \"type\": \"c8y_LocationUpdate\",\n  \"text\": \"LocUpdate\"\n}");
-        Request request = new Request.Builder()
-                .url("https://cdm.ram.m2m.telekom.com/event/events")
-                .post(body)
-                .addHeader("authorization", ultraSecureEncodedDigest)
-                .addHeader("content-type", "application/vnd.com.nsn.cumulocity.event+json;charset=UTF-8")
-                .addHeader("accept", "application/vnd.com.nsn.cumulocity.event+json")
-                .build();
-
-        Response response = client.newCall(request).execute();
-        if (response.code() == 201) {
-            System.out.println("Send LocationUpdate: - alt: " + alt + " long: " + longitude + " lat: " + latitude);
-        } else {
-            System.out.println("Error: Could not send LocationUpdate, Error Code: " + response.code());
-        }
-
-    }
 }
