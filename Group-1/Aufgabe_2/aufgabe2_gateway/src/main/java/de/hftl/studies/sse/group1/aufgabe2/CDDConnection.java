@@ -54,10 +54,6 @@ public class CDDConnection {
         }	
     }
 
-    public static String getCurrentTimeStamp() {
-        SimpleDateFormat SimpleDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-        return SimpleDate.format(new Date());
-    }
 
     private static String registerDevice() throws Exception {
         // TODO Auto-generated method stub
