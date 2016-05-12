@@ -8,4 +8,12 @@
                 <goal>install</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-c/a</actionName>
+            <displayName>c/a</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>assembly:assembly</goal>
+            </goals>
+        </action>
     </actions>
