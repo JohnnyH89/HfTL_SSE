@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import javax.crypto.Mac;
 
 import javax.crypto.SecretKey;
@@ -163,7 +164,7 @@ class ServerConnSecureReceive implements Runnable{
         	 try {
 				while ((msg = in.readLine()) != null) {
                                     
-                                    String[] splitMsg = msg.split("|||");
+                                    String[] splitMsg = msg.split(";");
                                     if(splitMsg.length < 2) {
                                         throw new Exception("Nachricht kaputt!");
                                     }
@@ -172,8 +173,8 @@ class ServerConnSecureReceive implements Runnable{
                                         
                                     Mac macInstance = Mac.getInstance("HmacSHA256");
                                     macInstance.init(sKey);    
-                                    byte[] integretyMac = macInstance.doFinal(ciphertext);
-                                    if(!integretyMac.equals(DatatypeConverter.parseHexBinary(splitMsg[1]))) {
+                                    byte[] integretyMac = macInstance.doFinal(DatatypeConverter.parseHexBinary(splitMsg[0]));
+                                    if(!Arrays.equals(integretyMac, DatatypeConverter.parseHexBinary(splitMsg[1]))) {
                                         throw new Exception("Integrity vulnerability detected!");
                                     }
                                     

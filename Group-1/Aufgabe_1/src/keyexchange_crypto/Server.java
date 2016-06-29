@@ -148,7 +148,7 @@ class ClientConnSecureSend implements Runnable{
                                 Mac macInstance = Mac.getInstance("HmacSHA256");
                                 macInstance.init(sKey);
                                 byte[] outMac = macInstance.doFinal(ciphertext);
-                                out.println(DatatypeConverter.printHexBinary(ciphertext) + "|||" + DatatypeConverter.printHexBinary(outMac));
+                                out.println(DatatypeConverter.printHexBinary(ciphertext) + ";" + DatatypeConverter.printHexBinary(outMac));
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
