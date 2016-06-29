@@ -5,67 +5,84 @@
  */
 package de.hftl.studies.sse.group1.aufgabe2_sensor_temp;
 
+import java.io.IOException;
 import java.util.Arrays;
-import org.hid4java.HidDevice;
-import org.hid4java.HidManager;
-import org.hid4java.HidServices;
-import org.hid4java.HidServicesListener;
-import org.hid4java.event.HidServicesEvent;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import purejavahidapi.DeviceRemovalListener;
+import purejavahidapi.HidDevice;
+import purejavahidapi.HidDeviceInfo;
+import purejavahidapi.InputReportListener;
+import purejavahidapi.PureJavaHidApi;
 
 /**
  *
- * @author baphs
+ * @author Malte Christjan Koch
  */
-public class ReadTemperatureThread implements HidServicesListener {
+public class ReadTemperatureThread {
 
     private Boolean connected = false;
-        private HidServices hidServices;
-    HidDevice sensor;
+    //private HidServices hidServices;
+    HidDevice sensor = null;
+    private float value = 0f;
+    
     public void init() {
-        hidServices = HidManager.getHidServices();
-        hidServices.addHidServicesListener(this);
-        
-        sensor = hidServices.getHidDevice(0x16C0, 0x0480, null);
-        if(sensor != null) {
-            connected = true;
+        //hidServices = HidManager.getHidServices();
+        //hidServices.addHidServicesListener(this);
+
+        HidDeviceInfo sensorInfo = null;
+        List<HidDeviceInfo> devices = PureJavaHidApi.enumerateDevices();
+        for (HidDeviceInfo dev : devices) {
+            if (dev.getVendorId() == 5824 && dev.getProductId() == 1152) {
+                sensorInfo = dev;
+                break;
+            }
+        }
+        if (sensorInfo != null) {
+            try {
+                sensor = PureJavaHidApi.openDevice(sensorInfo.getPath());
+                sensor.setInputReportListener(new DeviceListener());
+                sensor.setDeviceRemovalListener(new DeviceDeattached());
+                connected = true;
+            } catch (IOException ex) {
+                Logger.getLogger(ReadTemperatureThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
-    
-    public float getTemp() {
-        byte[] data = new byte[64];
-        sensor.read(data);
 
-        String out = Arrays.toString(data).replaceAll(" ", "");
-        String[] outSplit = out.split(",");
-        String sTemp = outSplit[4];
-        String multi = outSplit[5];
-        
-        
-        int temp = Integer.decode(sTemp);
-        int multiplier = temp > 40 ? 0 : 1;
-        
-        float outInt = temp + (256 * multiplier);
-        outInt = outInt / 10;
-       
-        return outInt;
-    }
-    
     public Boolean isConnected() {
         return connected;
     }
+
+    public float getValue() {
+        return this.value;
+    }
     
-    @Override
-    public void hidDeviceAttached(HidServicesEvent hse) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    private class DeviceListener implements InputReportListener {
 
-    @Override
-    public void hidDeviceDetached(HidServicesEvent hse) {
-        connected = false;
-    }
+        @Override
+        public void onInputReport(HidDevice source, byte id, byte[] data, int len) {
+            String out = Arrays.toString(data).replaceAll(" ", "");
+            String[] outSplit = out.split(",");
+            String sTemp = outSplit[4];
+            String multi = outSplit[5];
 
-    @Override
-    public void hidFailure(HidServicesEvent hse) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }    
+            int temp = Integer.decode(sTemp);
+            int multiplier = temp > 40 ? 0 : 1;
+
+            float outInt = temp + (256 * multiplier);
+            outInt = outInt / 10;
+            value = outInt;
+        }
+    }
+    
+    private class DeviceDeattached implements DeviceRemovalListener {
+
+        @Override
+        public void onDeviceRemoval(HidDevice source) {
+            connected = false;
+        }
+        
+    }
 }

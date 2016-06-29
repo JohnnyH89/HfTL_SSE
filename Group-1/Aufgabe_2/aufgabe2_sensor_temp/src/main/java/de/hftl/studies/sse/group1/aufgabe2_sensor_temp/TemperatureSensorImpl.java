@@ -6,32 +6,32 @@
 package de.hftl.studies.sse.group1.aufgabe2_sensor_temp;
 
 import de.hftl.studies.sse.group1.aufgabe2_interface.IOTGatewaySensorInterface;
-import java.rmi.Naming;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.hid4java.HidDevice;
-import org.hid4java.HidManager;
-import org.hid4java.HidServices;
-import org.hid4java.HidServicesListener;
-import org.hid4java.event.HidServicesEvent;
+import java.util.Scanner;
 
 /**
  *
- * @author baphs
+ * @author Malte Christjan Koch
  */
 public class TemperatureSensorImpl  {
     private static IOTGatewaySensorInterface gateway;
     
      public static void main(String args[]) throws Exception {
-        Object obj = Naming.lookup("rmi://localhost/IOTGatewaySensorInterface");
-        System.out.println("This client will send a few GPS updates via the Gateway and then destruct itself...");
-        gateway = (IOTGatewaySensorInterface) obj;
+       // Object obj = Naming.lookup("rmi://localhost/IOTGatewaySensorInterface");
+        System.out.println("This client will send a few Temperature updates via the Gateway and then destruct itself. Press Return to start");
+        Scanner a = new Scanner(System.in);
+        a.nextLine();
+        //gateway = (IOTGatewaySensorInterface) obj;
 
         ReadTemperatureThread rtt = new ReadTemperatureThread();
         rtt.init();
         while(rtt.isConnected()) {
-            gateway.sendTemperature(rtt.getTemp(), getCurrentTimeStamp());
+            Thread.sleep(3000);
+            //gateway.sendTemperature(rtt.getTemp(), getCurrentTimeStamp());
+            System.out.println("Temp: " + rtt.getValue());
         }
+        System.out.println("Device has been removed. Shutting down.");
     }
 
     private static String getCurrentTimeStamp() {
