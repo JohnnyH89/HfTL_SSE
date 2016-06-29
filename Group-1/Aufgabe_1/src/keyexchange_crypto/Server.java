@@ -10,6 +10,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import javax.crypto.Mac;
 
 import javax.crypto.SecretKey;
@@ -176,8 +177,20 @@ class ClientConnSecureReceive implements Runnable{
          * on stdout */
         	 try {
 				while ((msg = in.readLine()) != null) {
-					Crypto decrypter = new Crypto();
-					ciphertext = decrypter.decryptSymmetric(DatatypeConverter.parseHexBinary(msg), sKey);
+				String[] splitMsg = msg.split(";");
+                                    if(splitMsg.length < 2) {
+                                        throw new Exception("Nachricht kaputt!");
+                                    }
+                                    Crypto decrypter = new Crypto();
+                                    ciphertext = decrypter.decryptSymmetric(DatatypeConverter.parseHexBinary(splitMsg[0]), sKey);
+                                        
+                                    Mac macInstance = Mac.getInstance("HmacSHA256");
+                                    macInstance.init(sKey);    
+                                    byte[] integretyMac = macInstance.doFinal(DatatypeConverter.parseHexBinary(splitMsg[0]));
+                                    if(!Arrays.equals(integretyMac, DatatypeConverter.parseHexBinary(splitMsg[1]))) {
+                                        throw new Exception("Integrity vulnerability detected!");
+                                    }
+                                        
 				    System.out.println("Client: " + new String(ciphertext));
 				    }
 			} catch (Exception e) {

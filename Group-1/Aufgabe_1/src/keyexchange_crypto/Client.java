@@ -135,7 +135,11 @@ class ServerConnSecureSend implements Runnable{
 			while ((msg = stdIn.readLine()) != null) {
 				Crypto encrypter = new Crypto();
 				ciphertext = encrypter.encryptSymmetric(msg.getBytes(), sKey);
-				out.println(DatatypeConverter.printHexBinary(ciphertext));
+                                
+                                Mac macInstance = Mac.getInstance("HmacSHA256");
+                                macInstance.init(sKey);
+                                byte[] outMac = macInstance.doFinal(ciphertext);
+                                out.println(DatatypeConverter.printHexBinary(ciphertext) + ";" + DatatypeConverter.printHexBinary(outMac));
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
