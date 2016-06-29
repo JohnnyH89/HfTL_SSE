@@ -10,6 +10,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.Mac;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -143,7 +144,11 @@ class ClientConnSecureSend implements Runnable{
 			while ((msg = stdIn.readLine()) != null) {
 				Crypto encrypter = new Crypto();
 				ciphertext = encrypter.encryptSymmetric(msg.getBytes(), sKey);
-				out.println(DatatypeConverter.printHexBinary(ciphertext));
+                                
+                                Mac macInstance = Mac.getInstance("HmacSHA256");
+                                macInstance.init(sKey);
+                                byte[] outMac = macInstance.doFinal(ciphertext);
+                                out.println(DatatypeConverter.printHexBinary(ciphertext) + "|||" + DatatypeConverter.printHexBinary(outMac));
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
